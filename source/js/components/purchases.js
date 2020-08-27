@@ -6,21 +6,17 @@ import getRandomCity from "./helpers/get-random-city";
 
 let Name, Present, Gender, Count;
 
-
-
-function Purchases({lang, count, replace, gender, start, time, name, present}) {
-  this.countAmount = [2, 3, 4, 5];
-  this.lang = langEnter();
-
-  function langEnter() {
-    if (lang === '') {
-      return console.log('error');
-    } else if (lang === 'en' || lang === 'pl' || lang === 'hu' || lang === 'sk' || lang === 'cz' || lang === 'bg' || lang === 'ro' || lang === 'lt') {
-      return lang;
-    } else {
-      return console.log('The language is not supported!')
+// Счетчик
+let hours = 24;
+    let saved = localStorage.getItem('saved')
+    if (saved && (new Date().getTime() - saved > hours * 60 * 60 * 1000)) {
+      localStorage.clear()
     }
-  }
+    localStorage.setItem('saved', new Date().getTime());
+
+function Purchases({lang, count, replace, gender, start, time, name, present, point}) {
+  this.countAmount = [2, 3, 4, 5];
+  this.lang = lang;
 
 this.name = name;
 Name = name;
@@ -29,7 +25,8 @@ if (Name == undefined || Name == '') {
 }
 
   this.gender = gender || [`male`, `female`];
-
+  this.point = point;
+  let Point = document.querySelectorAll(this.point)[0];
 
   if (gender == '' || gender == undefined) {
     gender = ['male', 'female'];
@@ -59,14 +56,72 @@ if (Name == undefined || Name == '') {
     this.countOrder = countOrder;
     this.customers = customers;
     this.numberPurchase = numberPurchase;
-  } else {
-    this.numberPurchase = 1;
-    this.getCustomers();
-    this.getCountOrder();
-    localStorage.setItem(`purchases`, JSON.stringify(this));
-  }
+  } else if (Point)  {
 
-  this.prepare();
+
+      if (localStorage.getItem(`purchases`) === null) {
+
+        let r = Point.offsetTop;
+      function throttle(func, ms) {
+        let isThrottled = false,
+          savedArgs,
+          savedThis;
+        function wrapper() {
+          if (isThrottled) {
+            savedArgs = arguments;
+            savedThis = this;
+            return;
+          }
+
+          func.apply(this, arguments);
+
+          isThrottled = true;
+
+          setTimeout(function () {
+            isThrottled = false;
+            if (savedArgs) {
+              wrapper.apply(savedThis, savedArgs);
+              savedArgs = savedThis = null;
+            }
+          }, ms);
+        }
+
+        return wrapper;
+      }
+
+      var showThrottle = throttle(()=> {
+
+        if (window.window.pageYOffset + window.innerHeight > r) {
+          this.numberPurchase = 1;
+          this.getCustomers()
+          this.getCountOrder()
+          localStorage.setItem(`purchases`, JSON.stringify(this));
+          this.prepare();
+          window.removeEventListener("scroll", showThrottle);
+
+        }
+      }, 100);
+
+      window.addEventListener("scroll", showThrottle);
+    }
+
+  } else {
+    if (localStorage.getItem(`purchases`) === null) {
+      this.numberPurchase = 1;
+          this.getCustomers();
+          this.getCountOrder();
+          localStorage.setItem(`purchases`, JSON.stringify(this));
+  }
+  }
+  if (Point) {
+    if (localStorage.getItem(`purchases`) === null) {
+    console.log('');
+    } else {
+      this.prepare();
+    }
+  } else {
+    this.prepare();
+  }
 }
 
 Purchases.prototype.names = names;
@@ -77,10 +132,13 @@ Purchases.prototype.getRandomCity = function () {
 
 
 Purchases.prototype.getCustomers = function () {
+  if (this.lang == '') {
+    this.customers = 0;
+    console.log('error');
+  } else if (this.lang == ['pl'] || this.lang == ['hu'] || this.lang == ['sk'] || this.lang == ['cz'] || this.lang == ['bg'] || this.lang == ['ro'] || this.lang == ['lt']) {
   this.customers = [];
   let count = 1,
-      numberPerson;
-
+  numberPerson;
   let y = [];
   y.push('male', 'female');
 
@@ -116,7 +174,10 @@ Purchases.prototype.getCustomers = function () {
     name: this.getRundomGenderName(gender),
     count: 4,
   });
-
+} else {
+  this.customers = 0;
+  console.log('The language is not supported!')
+}
 };
 
 
@@ -151,7 +212,7 @@ Purchases.prototype.getRundomGenderName = function (gender) {
 };
 
 Purchases.prototype.getCountOrder = function () {
-  let count = 3;
+  let count = 5;
   let current = 0;
 
   for (let i = 0; i < this.customers.length; i++) {
@@ -163,7 +224,6 @@ Purchases.prototype.getCountOrder = function () {
     }
 
     count += this.customers[i].count;
-
   }
 
   this.countOrder = count;
@@ -181,8 +241,6 @@ function getCity() {
 
 }
 getCity();
-
-
 //
 
 Purchases.prototype.getOrder = function (gender) {

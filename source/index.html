@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="jj">
 
 <head>
   <meta charset="UTF-8">
@@ -250,7 +250,7 @@
     Molestiae distinctio, tempore repellendus, vero vel similique eius esse pariatur commodi cupiditate eveniet
     aspernatur sit error doloribus. Fugit at totam labore! Officia incidunt qui dolorum atque accusamus, voluptatibus
     itaque suscipit.
-    <!-- <div id="main-form">main-form</div> -->
+    <div id="main-form">main-form</div>
     Blanditiis ex, earum animi laudantium reiciendis soluta beatae fugit facere tenetur architecto, minima, velit rerum
     quia laborum in eius sequi. Accusamus nam laudantium facere, nulla blanditiis expedita debitis soluta dolorem!
     Cumque, culpa magnam excepturi tenetur aperiam provident similique ipsum vel ea inventore officiis eum consequuntur?
@@ -266,82 +266,17 @@
   <script src="assets/features/purchase-messages/purchase-messages.js"></script>
 
   <script>
-    // Счетчик
-    let hours = 24;
-    let saved = localStorage.getItem('saved')
-    if (saved && (new Date().getTime() - saved > hours * 60 * 60 * 1000)) {
-      localStorage.clear()
-    }
-    localStorage.setItem('saved', new Date().getTime())
-    // localStorage.clear('city');
-
-    let purchases = localStorage.getItem('purchases');
-    let offerFormTop = document.querySelector('#main-form');
-
-    function start() {
-      return purchases = new Purchases({
-      lang: document.documentElement.lang,
+  const purchases = new Purchases({
+      lang: 'pl',
       name: 'full',        // 'name', 'full', 'cut'
-      gender: '',   // ['male'], ['femail'], ''
+      gender: ['male'],           // ['male'], ['femail'], ''
       replace: '.replace',
       start: 15000,
       present: false,
       time: 15000,
-      count: 10
+      count: 10,
+      point: '#main-form'
     });
-    }
-
-   if (purchases === null) {
-    if (offerFormTop) {
-      if (purchases === null) {
-        let r = offerFormTop.offsetTop;
-      function throttle(func, ms) {
-        let isThrottled = false,
-          savedArgs,
-          savedThis;
-
-        function wrapper() {
-          if (isThrottled) {
-            savedArgs = arguments;
-            savedThis = this;
-            return;
-          }
-
-          func.apply(this, arguments);
-
-          isThrottled = true;
-
-          setTimeout(function () {
-            isThrottled = false;
-            if (savedArgs) {
-              wrapper.apply(savedThis, savedArgs);
-              savedArgs = savedThis = null;
-            }
-          }, ms);
-        }
-
-        return wrapper;
-      }
-
-      var showThrottle = throttle(show, 100);
-
-      function show(evt) {
-        if (window.window.pageYOffset + window.innerHeight > r) {
-         start();
-          window.removeEventListener("scroll", showThrottle);
-        }
-      }
-
-      var evtPurchases = window.addEventListener("scroll", showThrottle);
-    }
-    } else {
-      if (purchases === null) {
-        start();
-    }
-  }
-   } else {
-    start();
-   }
 
   </script>
 
