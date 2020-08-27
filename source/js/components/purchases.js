@@ -106,7 +106,6 @@ Purchases.prototype.getCustomers = function () {
       name: this.getRundomGenderName(gender),
       count: this.countAmount[getRandomInteger(0, this.countAmount.length - 1)],
     });
-    console.log('count '+count)
   }
 
   let gender = getRandomGender(this.gender);
