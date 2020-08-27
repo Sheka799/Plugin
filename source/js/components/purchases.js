@@ -14,8 +14,8 @@ let hours = 24;
     }
     localStorage.setItem('saved', new Date().getTime());
 
-function Purchases({lang, count, replace, gender, start, time, name, present, point}) {
-  this.countAmount = [2, 3, 4, 5];
+function Purchases({lang, count, replace, gender, start, time, name, present, point, countAmount}) {
+  this.countAmount = countAmount;
   this.lang = lang;
 
 this.name = name;
@@ -139,6 +139,9 @@ Purchases.prototype.getCustomers = function () {
   this.customers = [];
   let count = 1,
   numberPerson;
+
+
+
   let y = [];
   y.push('male', 'female');
 
@@ -164,6 +167,7 @@ Purchases.prototype.getCustomers = function () {
       name: this.getRundomGenderName(gender),
       count: this.countAmount[getRandomInteger(0, this.countAmount.length - 1)],
     });
+    console.log(this.getRundomGenderName(gender))
   }
 
   let gender = getRandomGender(this.gender);
@@ -174,6 +178,7 @@ Purchases.prototype.getCustomers = function () {
     name: this.getRundomGenderName(gender),
     count: 4,
   });
+  console.log(this.getRundomGenderName(gender))
 } else {
   this.customers = 0;
   console.log('The language is not supported!')
@@ -224,9 +229,11 @@ Purchases.prototype.getCountOrder = function () {
     }
 
     count += this.customers[i].count;
+    console.log(count)
   }
 
   this.countOrder = count;
+  console.log(this.countOrder)
 };
 
 
@@ -291,7 +298,7 @@ Purchases.prototype.getReceive = function (gender) {
 
 Purchases.prototype.getOrderPurchase = function () {
   this.countOrder -= this.customer.count;
-
+  console.log(this.countOrder)
   if (Present == true) {
     if (this.customer.count == 3) {
       --this.countOrder;
@@ -322,7 +329,7 @@ Purchases.prototype.getOrderPurchase = function () {
 };
 Purchases.prototype.getOrderPurchaseCity = function () {
   this.countOrder -= this.customer.count;
-
+  console.log(this.countOrder)
   if (Present == true) {
     if (this.customer.count == 3) {
       --this.countOrder;
@@ -534,7 +541,7 @@ return content
 
 //
 
-// let numberCount = 0;
+let numberCount = 0;
 Purchases.prototype.getNextPurchase = function () {
   let content = null;
 
@@ -559,9 +566,12 @@ Purchases.prototype.getNextPurchase = function () {
   }
 
   this.numberPurchase++;
-  // if (this.numberPurchase > 5) {
-  //   numberCount++;
-  // }
+  if (this.numberPurchase > 5) {
+    numberCount++;
+  }
+  if (numberCount == Count) {
+    this.customers.length = 0;
+  }
   if (this.numberPurchase > 5) {
     this.numberPurchase = 1;
   }
