@@ -412,7 +412,10 @@ Purchases.prototype.prepare = function () {
 
   this.replaceCountOrder();
   if (this.customers.length > 0) {
-    document.body.insertAdjacentHTML(`beforeend`, purchases);
+    setTimeout(() => {
+      document.body.insertAdjacentHTML(`beforeend`, purchases);
+    }, this.start);
+
     setTimeout(() => {
       this.renderPurchases();
     }, this.start);
