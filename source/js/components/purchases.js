@@ -4,7 +4,7 @@ import names from "./countries/names/names";
 import getRandomName from "./helpers/get-random-name";
 import getRandomCity from "./helpers/get-random-city";
 
-let Name, Present, Gender, Count;
+let Name, Present, Gender, Count, numberPerson;
 
 // Счетчик
 let hours = 24;
@@ -99,7 +99,7 @@ if (Name == undefined || Name == '') {
         if (window.window.pageYOffset + window.innerHeight > r) {
           this.numberPurchase = 1;
           this.getCustomers()
-          this.geGifttCustomers()
+          this.getGiftCustomers()
           this.getCountOrder()
           localStorage.setItem(`purchases`, JSON.stringify(this));
           this.prepare();
@@ -143,8 +143,7 @@ Purchases.prototype.getCustomers = function () {
     console.log('error');
   } else if (this.lang == ['pl'] || this.lang == ['hu'] || this.lang == ['sk'] || this.lang == ['cz'] || this.lang == ['bg'] || this.lang == ['ro'] || this.lang == ['lt']) {
   this.customers = [];
-  let count = 1,
-  numberPerson;
+  let count = 1;
 
 
 
@@ -152,14 +151,17 @@ Purchases.prototype.getCustomers = function () {
   y.push('male', 'female');
 
   if (this.gender[0] + this.gender[1] == y[0] + y[1]) {
-    numberPerson = this.names[this.lang].male.length / 2 + this.names[this.lang].female.length / 2;
+    numberPerson = Math.floor(this.names[this.lang].male.length / 2 + this.names[this.lang].female.length / 2);
   } else {
     numberPerson = this.names[this.lang][this.gender].length;
   }
-  for (let i = 1; i < Count * 2; i++) {
+
+  for (let i = 1; i < numberPerson; i++) {
     count--;
+
     let gender = getRandomGender(this.gender);
     let city = null;
+
 
     city = this.getRandomCity();
 
@@ -190,25 +192,12 @@ Purchases.prototype.getCustomers = function () {
 }
 };
 
-
-
-
-
-
-
-
-
-
-
-
 Purchases.prototype.getGiftCustomers = function () {
   if (this.lang == '') {
     this.customers = 0;
-    console.log('error');
   } else if (this.lang == ['pl'] || this.lang == ['hu'] || this.lang == ['sk'] || this.lang == ['cz'] || this.lang == ['bg'] || this.lang == ['ro'] || this.lang == ['lt']) {
   this.giftCustomers = [];
-  let count = 1,
-  numberPerson;
+  let count = 1;
 
 
 
@@ -220,7 +209,7 @@ Purchases.prototype.getGiftCustomers = function () {
   } else {
     numberPerson = this.names[this.lang][this.gender].length;
   }
-  for (let i = 1; Count * 3; i++) {
+  for (let i = 1; i < numberPerson; i++) {
     count--;
     let gender = getRandomGender(this.gender);
     let city = null;
@@ -250,17 +239,8 @@ Purchases.prototype.getGiftCustomers = function () {
 
 } else {
   this.customers = 0;
-  console.log('The language is not supported!')
 }
 };
-
-
-
-
-
-
-
-
 
 
 Purchases.prototype.getRundomGenderName = function (gender) {
@@ -295,8 +275,10 @@ Purchases.prototype.getRundomGenderName = function (gender) {
 
 Purchases.prototype.getCountOrder = function () {
   let count = 5;
-
-  for (let i = 0; i < Count * 2; i++) {
+  let current = 0;
+  for (let i = 0; i < this.customers.length; i++) {
+    current++;
+    if (current !== Count) {
     if (Present == true) {
       if (this.customers[i].count == 3) {
     count += this.customers[i].count + 1;
@@ -312,8 +294,25 @@ Purchases.prototype.getCountOrder = function () {
   } else {
     count += this.customers[i].count
   }
+} else if (current === Count) {
+  if (Present == true) {
+    if (this.customers[i].count == 3) {
+  count += this.customers[i].count + 1;
   }
-
+   else if (this.customers[i].count == 4) {
+  count += this.customers[i].count + 2;
+  }
+   else if (this.customers[i].count == 5) {
+  count += this.customers[i].count + 3;
+  } else {
+    count += this.customers[i].count;
+  }
+} else {
+  count += this.customers[i].count;
+}
+  this.customers.length = Count * 2;
+}
+  }
   this.countOrder = count;
 };
 
@@ -379,7 +378,6 @@ Purchases.prototype.getReceive = function (gender) {
 
 Purchases.prototype.getOrderPurchase = function () {
   this.countOrder -= this.customer.count;
-  console.log(this.countOrder)
   if (Present == true) {
     if (this.customer.count == 3) {
       --this.countOrder;
@@ -410,7 +408,6 @@ Purchases.prototype.getOrderPurchase = function () {
 };
 Purchases.prototype.getOrderPurchaseCity = function () {
   this.countOrder -= this.customer.count;
-  console.log(this.countOrder)
   if (Present == true) {
     if (this.customer.count == 3) {
       --this.countOrder;
@@ -631,14 +628,14 @@ Purchases.prototype.getNextPurchase = function () {
       content = this.getStockBalancePurchase();
       break;
     case 2:
-      this.customer = this.customers.pop();
+      this.customer = this.customers.shift();
       content = this.getOrderPurchaseCity();
       break;
     case 3:
       content = this.randomMessage();
       break;
     case 4:
-      this.customer = this.customers.pop();
+      this.customer = this.customers.shift();
       content = this.getOrderPurchase();
       break;
     case 5:
