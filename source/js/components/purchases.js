@@ -310,7 +310,7 @@ Purchases.prototype.getCountOrder = function () {
 } else {
   count += this.customers[i].count;
 }
-  this.customers.length = Count * 2;
+    this.customers.length = Count * 2;
 }
   }
   this.countOrder = count;
@@ -512,14 +512,14 @@ Purchases.prototype.getСonsultation = function () {
 Purchases.prototype.getStockBalancePurchase = function () {
   const list = {
     ru: `<div class="purchases purchases__sail purchases--boxes purchases--in"><div class="purchases__main">Остаток товара по акции:<br><span class="red">${this.countOrder} шт.</span></div></div>`,
-    en: `<div class="purchases purchases__sail purchases--boxes purchases--in"><div class="purchases__main">Balance of goods under the promotion:<br><span class="red">${this.countOrder} pcs.</span></div></div>`,
+    en: `<div class="purchases purchases__sail purchases--boxes purchases--in"><div class="purchases__main">Balance of goods under the promotion: <span class="red">${this.countOrder} pcs.</span></div></div>`,
     bg: `<div class="purchases purchases__sail purchases--boxes purchases--in"><div class="purchases__main">Баланс на промоционалните продукти:<br><span class="red">${this.countOrder} бр.</span></div></div>`,
     pl: `<div class="purchases purchases__sail purchases--boxes purchases--in"><div class="purchases__main">Pozostała ilość w promocji:<br><span class="red">${this.countOrder} szt.</span></div></div>`,
-    ro: `<div class="purchases purchases__sail purchases--boxes purchases--in"><div class="purchases__main">Numărul articolelor rămase la reducere:<br><span class="red">${this.countOrder} buc.</span></div></div>`,
+    ro: `<div class="purchases purchases__sail purchases--boxes purchases--in"><div class="purchases__main">Numărul articolelor rămase la reducere: <span class="red">${this.countOrder} buc.</span></div></div>`,
     cz: `<div class="purchases purchases__sail purchases--boxes purchases--in"><div class="purchases__main">Skladové zásoby zboží v akci:<br><span class="red">${this.countOrder} ks.</span></div></div>`,
     sk: `<div class="purchases purchases__sail purchases--boxes purchases--in"><div class="purchases__main">Počet kusov za akciovú cenu:<br><span class="red">${this.countOrder} ks.</span></div></div>`,
     lt: `<div class="purchases purchases__sail purchases--boxes purchases--in"><div class="purchases__main">Akcijos prekių likutis:<br><span class="red">${this.countOrder} vnt.</span></div></div>`,
-    hu: `<div class="purchases purchases__sail purchases--boxes purchases--in"><div class="purchases__main">A promócióban még elérhető termékek száma:<br><span class="red">${this.countOrder} db.</span></div></div>`,
+    hu: `<div class="purchases purchases__sail purchases--boxes purchases--in"><div class="purchases__main">A promócióban még elérhető termékek száma: <span class="red">${this.countOrder} db.</span></div></div>`,
   };
   return list[this.lang];
 };
