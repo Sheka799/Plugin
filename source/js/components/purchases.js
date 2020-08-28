@@ -678,7 +678,7 @@ Purchases.prototype.renderPurchases = function () {
   if (this.customers.length > 0) {
     setTimeout(() => {
       this.renderPurchases();
-    }, getRandomInteger(this.time + 1500, this.time + 3000));
+    }, getRandomInteger(this.time + 15000, this.time + 30000));
   }
 };
 
