@@ -26,7 +26,11 @@ if (Name == undefined || Name == '') {
 
   this.gender = gender || [`male`, `female`];
   this.point = point;
-  let Point = document.querySelectorAll(this.point)[0];
+
+  let Point;
+  if (point !== '') {
+   Point = document.querySelectorAll(this.point)[0]
+  }
 
   if (gender == '' || gender == undefined) {
     gender = ['male', 'female'];
@@ -52,9 +56,10 @@ if (Name == undefined || Name == '') {
   }
 
   if (localStorage.getItem(`purchases`) !== null) {
-    const {countOrder, customers, numberPurchase} = JSON.parse(localStorage.getItem(`purchases`));
+    const {countOrder, customers, numberPurchase, giftCustomers} = JSON.parse(localStorage.getItem(`purchases`));
     this.countOrder = countOrder;
     this.customers = customers;
+    this.giftCustomers = giftCustomers;
     this.numberPurchase = numberPurchase;
   } else if (Point)  {
 
@@ -94,6 +99,7 @@ if (Name == undefined || Name == '') {
         if (window.window.pageYOffset + window.innerHeight > r) {
           this.numberPurchase = 1;
           this.getCustomers()
+          this.geGifttCustomers()
           this.getCountOrder()
           localStorage.setItem(`purchases`, JSON.stringify(this));
           this.prepare();
@@ -109,6 +115,7 @@ if (Name == undefined || Name == '') {
     if (localStorage.getItem(`purchases`) === null) {
       this.numberPurchase = 1;
           this.getCustomers();
+          this.getGiftCustomers();
           this.getCountOrder();
           localStorage.setItem(`purchases`, JSON.stringify(this));
   }
@@ -130,7 +137,6 @@ Purchases.prototype.getRandomCity = function () {
   return getRandomCity(this.lang);
 };
 
-
 Purchases.prototype.getCustomers = function () {
   if (this.lang == '') {
     this.customers = 0;
@@ -150,7 +156,7 @@ Purchases.prototype.getCustomers = function () {
   } else {
     numberPerson = this.names[this.lang][this.gender].length;
   }
-  for (let i = 1; i < numberPerson; i++) {
+  for (let i = 1; i < Count * 2; i++) {
     count--;
     let gender = getRandomGender(this.gender);
     let city = null;
@@ -167,7 +173,6 @@ Purchases.prototype.getCustomers = function () {
       name: this.getRundomGenderName(gender),
       count: this.countAmount[getRandomInteger(0, this.countAmount.length - 1)],
     });
-    console.log(this.getRundomGenderName(gender))
   }
 
   let gender = getRandomGender(this.gender);
@@ -178,12 +183,84 @@ Purchases.prototype.getCustomers = function () {
     name: this.getRundomGenderName(gender),
     count: 4,
   });
-  console.log(this.getRundomGenderName(gender))
+
 } else {
   this.customers = 0;
   console.log('The language is not supported!')
 }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+Purchases.prototype.getGiftCustomers = function () {
+  if (this.lang == '') {
+    this.customers = 0;
+    console.log('error');
+  } else if (this.lang == ['pl'] || this.lang == ['hu'] || this.lang == ['sk'] || this.lang == ['cz'] || this.lang == ['bg'] || this.lang == ['ro'] || this.lang == ['lt']) {
+  this.giftCustomers = [];
+  let count = 1,
+  numberPerson;
+
+
+
+  let y = [];
+  y.push('male', 'female');
+
+  if (this.gender[0] + this.gender[1] == y[0] + y[1]) {
+    numberPerson = this.names[this.lang].male.length / 2 + this.names[this.lang].female.length / 2;
+  } else {
+    numberPerson = this.names[this.lang][this.gender].length;
+  }
+  for (let i = 1; Count * 3; i++) {
+    count--;
+    let gender = getRandomGender(this.gender);
+    let city = null;
+
+    city = this.getRandomCity();
+
+    if (count === 0) {
+      count = 3;
+    }
+
+    this.giftCustomers.push({
+      gender,
+      city,
+      name: this.getRundomGenderName(gender),
+      count: this.countAmount[getRandomInteger(0, this.countAmount.length - 1)],
+    });
+  }
+
+  let gender = getRandomGender(this.gender);
+
+  this.giftCustomers.push({
+    gender,
+    city: this.getRandomCity(),
+    name: this.getRundomGenderName(gender),
+    count: 4,
+  });
+
+} else {
+  this.customers = 0;
+  console.log('The language is not supported!')
+}
+};
+
+
+
+
+
+
+
+
 
 
 Purchases.prototype.getRundomGenderName = function (gender) {
@@ -218,22 +295,26 @@ Purchases.prototype.getRundomGenderName = function (gender) {
 
 Purchases.prototype.getCountOrder = function () {
   let count = 5;
-  let current = 0;
 
-  for (let i = 0; i < this.customers.length; i++) {
-    current++;
-
-    if (current === 3) {
-      current = 0;
-      continue;
+  for (let i = 0; i < Count * 2; i++) {
+    if (Present == true) {
+      if (this.customers[i].count == 3) {
+    count += this.customers[i].count + 1;
     }
-
-    count += this.customers[i].count;
-    console.log(count)
+     else if (this.customers[i].count == 4) {
+    count += this.customers[i].count + 2;
+    }
+     else if (this.customers[i].count == 5) {
+    count += this.customers[i].count + 3;
+    } else {
+      count += this.customers[i].count;
+    }
+  } else {
+    count += this.customers[i].count
+  }
   }
 
   this.countOrder = count;
-  console.log(this.countOrder)
 };
 
 
@@ -369,15 +450,15 @@ if (localStorage.getItem('city') !== '')
 
 Purchases.prototype.getPackagesPurchase = function () {
   const list = {
-    ru: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)}&nbsp;заказ ${this.customer.count}&nbsp;шт.</span><br>Заказ доставлен в: ${this.customer.city}</div></div>`,
-    en: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)}&nbsp;an order of ${this.customer.count}&nbsp;pcs.</span><br>The order has been delivered to: ${this.customer.city}</div></div>`,
-    bg: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)}&nbsp;поръчката от&nbsp;${this.customer.count}&nbsp;бр.</span><br>Поръчката беше доставена до: ${this.customer.city}</div></div>`,
-    pl: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)}&nbsp;zamówienie ${this.customer.count}&nbsp;szt.</span><br>Zamówienie dostarczono do miasta: ${this.customer.city}</div></div>`,
-    ro: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)}&nbsp;o comandă de&nbsp;${this.customer.count}&nbsp;buc.</span><br>Comanda a fost livrată&nbsp;la:&nbsp;${this.customer.city}</div></div>`,
-    cz: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)} objednávku ${this.customer.count}&nbsp;ks.</span><br>Objednávka byla doručena do města: ${this.customer.city}</div></div>`,
-    sk: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)} objednávku ${this.customer.count}&nbsp;kusov.</span><br>Objednávka bola doručená do mesta: ${this.customer.city}</div></div>`,
-    lt: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)} ${this.customer.count}&nbsp;vnt.</span><br>Užsakymas pristatytas į: ${this.customer.city}</div></div>`,
-    hu: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.customer.count}&nbsp;db-os ${this.getReceive(this.customer.gender)} vett át.</span><br>A rendelést ${this.customer.city} városába került kiszállítása.</div></div>`,
+    ru: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)}&nbsp;заказ ${this.giftCustomer.count}&nbsp;шт.</span><br>Заказ доставлен в: ${this.giftCustomer.city}</div></div>`,
+    en: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)}&nbsp;an order of ${this.giftCustomer.count}&nbsp;pcs.</span><br>The order has been delivered to: ${this.giftCustomer.city}</div></div>`,
+    bg: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)}&nbsp;поръчката от&nbsp;${this.giftCustomer.count}&nbsp;бр.</span><br>Поръчката беше доставена до: ${this.giftCustomer.city}</div></div>`,
+    pl: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)}&nbsp;zamówienie ${this.giftCustomer.count}&nbsp;szt.</span><br>Zamówienie dostarczono do miasta: ${this.giftCustomer.city}</div></div>`,
+    ro: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)}&nbsp;o comandă de&nbsp;${this.giftCustomer.count}&nbsp;buc.</span><br>Comanda a fost livrată&nbsp;la:&nbsp;${this.giftCustomer.city}</div></div>`,
+    cz: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)} objednávku ${this.giftCustomer.count}&nbsp;ks.</span><br>Objednávka byla doručena do města: ${this.giftCustomer.city}</div></div>`,
+    sk: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)} objednávku ${this.giftCustomer.count}&nbsp;kusov.</span><br>Objednávka bola doručená do mesta: ${this.giftCustomer.city}</div></div>`,
+    lt: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)} ${this.giftCustomer.count}&nbsp;vnt.</span><br>Užsakymas pristatytas į: ${this.giftCustomer.city}</div></div>`,
+    hu: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.giftCustomer.count}&nbsp;db-os ${this.getReceive(this.giftCustomer.gender)} vett át.</span><br>A rendelést ${this.giftCustomer.city} városába került kiszállítása.</div></div>`,
   };
   return list[this.lang];
 };
@@ -387,46 +468,46 @@ if (localStorage.getItem('city') !== '')
 {
   localCity = localStorage.getItem('city');
 } else {
-    localCity = this.customer.city;
+    localCity = this.giftCustomer.city;
 }
   const list = {
-    ru: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)}&nbsp;заказ ${this.customer.count}&nbsp;шт.</span><br>Заказ доставлен в: ${localCity}</div></div>`,
-    en: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)}&nbsp;an order of ${this.customer.count}&nbsp;pcs.</span><br>The order has been delivered to: ${localCity}</div></div>`,
-    bg: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)}&nbsp;поръчката от&nbsp;${this.customer.count}&nbsp;бр.</span><br>Поръчката беше доставена до: ${localCity}</div></div>`,
-    pl: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)}&nbsp;zamówienie ${this.customer.count}&nbsp;szt.</span><br>Zamówienie dostarczono do miasta: ${localCity}</div></div>`,
-    ro: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)}&nbsp;o comandă de&nbsp;${this.customer.count}&nbsp;buc.</span><br>Comanda a fost livrată&nbsp;la:&nbsp;${localCity}</div></div>`,
-    cz: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)} objednávku ${this.customer.count}&nbsp;ks.</span><br>Objednávka byla doručena do města: ${localCity}</div></div>`,
-    sk: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)} objednávku ${this.customer.count}&nbsp;kusov.</span><br>Objednávka bola doručená do mesta: ${localCity}</div></div>`,
-    lt: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getReceive(this.customer.gender)} ${this.customer.count}&nbsp;vnt.</span><br>Užsakymas pristatytas į: ${localCity}</div></div>`,
-    hu: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.customer.count}&nbsp;db-os ${this.getReceive(this.customer.gender)} vett át.</span><br>A rendelést ${localCity} városába került kiszállítása.</div></div>`,
+    ru: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)}&nbsp;заказ ${this.giftCustomer.count}&nbsp;шт.</span><br>Заказ доставлен в: ${localCity}</div></div>`,
+    en: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)}&nbsp;an order of ${this.giftCustomer.count}&nbsp;pcs.</span><br>The order has been delivered to: ${localCity}</div></div>`,
+    bg: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)}&nbsp;поръчката от&nbsp;${this.giftCustomer.count}&nbsp;бр.</span><br>Поръчката беше доставена до: ${localCity}</div></div>`,
+    pl: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)}&nbsp;zamówienie ${this.giftCustomer.count}&nbsp;szt.</span><br>Zamówienie dostarczono do miasta: ${localCity}</div></div>`,
+    ro: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)}&nbsp;o comandă de&nbsp;${this.giftCustomer.count}&nbsp;buc.</span><br>Comanda a fost livrată&nbsp;la:&nbsp;${localCity}</div></div>`,
+    cz: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)} objednávku ${this.giftCustomer.count}&nbsp;ks.</span><br>Objednávka byla doručena do města: ${localCity}</div></div>`,
+    sk: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)} objednávku ${this.giftCustomer.count}&nbsp;kusov.</span><br>Objednávka bola doručená do mesta: ${localCity}</div></div>`,
+    lt: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)} ${this.giftCustomer.count}&nbsp;vnt.</span><br>Užsakymas pristatytas į: ${localCity}</div></div>`,
+    hu: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.giftCustomer.count}&nbsp;db-os ${this.getReceive(this.giftCustomer.gender)} vett át.</span><br>A rendelést ${localCity} városába került kiszállítása.</div></div>`,
   };
   return list[this.lang];
 };
 Purchases.prototype.getApplication = function () {
   const list = {
-    ru: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getLeft(this.customer.gender)}&nbsp;заявку на обратный звонок</div></div>`,
-    en: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getLeft(this.customer.gender)}&nbsp;a request for a callback</div></div>`,
-    bg: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getLeft(this.customer.gender)}&nbsp;заявка за обаждане</div></div>`,
-    pl: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getLeft(this.customer.gender)}&nbsp;o oddzwonienie</div></div>`,
-    ro: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getLeft(this.customer.gender)}&nbsp;o solicitare pentru un apel</div></div>`,
-    cz: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getLeft(this.customer.gender)}&nbsp;o zpětné volání</div></div>`,
-    sk: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getLeft(this.customer.gender)}&nbsp;žiadosť o telefonát</div></div>`,
-    lt: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getLeft(this.customer.gender)}&nbsp;perskambinimui</div></div>`,
-    hu: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getLeft(this.customer.gender)}&nbsp;kért</div></div>`,
+    ru: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getLeft(this.giftCustomer.gender)}&nbsp;заявку на обратный звонок</div></div>`,
+    en: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getLeft(this.giftCustomer.gender)}&nbsp;a request for a callback</div></div>`,
+    bg: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getLeft(this.giftCustomer.gender)}&nbsp;заявка за обаждане</div></div>`,
+    pl: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getLeft(this.giftCustomer.gender)}&nbsp;o oddzwonienie</div></div>`,
+    ro: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getLeft(this.giftCustomer.gender)}&nbsp;o solicitare pentru un apel</div></div>`,
+    cz: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getLeft(this.giftCustomer.gender)}&nbsp;o zpětné volání</div></div>`,
+    sk: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getLeft(this.giftCustomer.gender)}&nbsp;žiadosť o telefonát</div></div>`,
+    lt: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getLeft(this.giftCustomer.gender)}&nbsp;perskambinimui</div></div>`,
+    hu: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getLeft(this.giftCustomer.gender)}&nbsp;kért</div></div>`,
   };
   return list[this.lang];
 };
 Purchases.prototype.getСonsultation = function () {
   const list = {
-    ru: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getOrder(this.customer.gender)}&nbsp;бесплатную консультацию</div></div>`,
-    en: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getOrder(this.customer.gender)}&nbsp;a free specialist consultation</div></div>`,
-    bg: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getOrder(this.customer.gender)}&nbsp;безплатна консултация със специалист</div></div>`,
-    pl: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getOrder(this.customer.gender)}&nbsp;o bezpłatną konsultację specjalisty</div></div>`,
-    ro: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getOrder(this.customer.gender)}&nbsp;consultanță gratuită cu un specialist</div></div>`,
-    cz: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getOrder(this.customer.gender)}&nbsp;o bezplatnou odbornou konzultaci</div></div>`,
-    sk: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getOrder(this.customer.gender)}&nbsp;o bezplatnú odbornú konzultáciu</div></div>`,
-    lt: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getOrder(this.customer.gender)}&nbsp;užklausą nemokamai specialisto konsultacijai</div></div>`,
-    hu: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.customer.name}</span> ${this.getOrder(this.customer.gender)}&nbsp;szakértői konzultációt kért</div></div>`,
+    ru: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getOrder(this.giftCustomer.gender)}&nbsp;бесплатную консультацию</div></div>`,
+    en: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getOrder(this.giftCustomer.gender)}&nbsp;a free specialist consultation</div></div>`,
+    bg: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getOrder(this.giftCustomer.gender)}&nbsp;безплатна консултация със специалист</div></div>`,
+    pl: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getOrder(this.giftCustomer.gender)}&nbsp;o bezpłatną konsultację specjalisty</div></div>`,
+    ro: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getOrder(this.giftCustomer.gender)}&nbsp;consultanță gratuită cu un specialist</div></div>`,
+    cz: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getOrder(this.giftCustomer.gender)}&nbsp;o bezplatnou odbornou konzultaci</div></div>`,
+    sk: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getOrder(this.giftCustomer.gender)}&nbsp;o bezplatnú odbornú konzultáciu</div></div>`,
+    lt: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getOrder(this.giftCustomer.gender)}&nbsp;užklausą nemokamai specialisto konsultacijai</div></div>`,
+    hu: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getOrder(this.giftCustomer.gender)}&nbsp;szakértői konzultációt kért</div></div>`,
   };
   return list[this.lang];
 };
@@ -518,20 +599,20 @@ Purchases.prototype.randomMessage = function() {
         break;
 
         case 1:
-          this.customer = this.customers.pop();
+          this.giftCustomer = this.giftCustomers.pop();
           content = this.getPackagesPurchase();
         break;
 
         case 2:
-          this.customer = this.customers.pop();
+          this.giftCustomer = this.giftCustomers.pop();
           content = this.getСonsultation();
         break;
         case 3:
-          this.customer = this.customers.pop();
+          this.giftCustomer = this.giftCustomers.pop();
           content = this.getApplication();
         break;
         case 4:
-          this.customer = this.customers.pop();
+          this.giftCustomer = this.giftCustomers.pop();
           content = this.getPackagesPurchaseCity();
         break;
 
@@ -569,6 +650,7 @@ Purchases.prototype.getNextPurchase = function () {
   if (this.numberPurchase > 5) {
     numberCount++;
   }
+
   if (numberCount == Count) {
     this.customers.length = 0;
   }
@@ -599,7 +681,7 @@ Purchases.prototype.renderPurchases = function () {
   if (this.customers.length > 0) {
     setTimeout(() => {
       this.renderPurchases();
-    }, getRandomInteger(this.time + 15000, this.time + 30000));
+    }, getRandomInteger(this.time + 1500, this.time + 3000));
   }
 };
 
