@@ -4,32 +4,45 @@ import names from "./countries/names/names";
 import getRandomName from "./helpers/get-random-name";
 import getRandomCity from "./helpers/get-random-city";
 
-let Name, Present, Gender, Count, numberPerson;
+let Name, Present, Gender, Count, numberPerson, CountAmount;
 
 // Счетчик
 let hours = 24;
-    let saved = localStorage.getItem('saved')
-    if (saved && (new Date().getTime() - saved > hours * 60 * 60 * 1000)) {
-      localStorage.clear()
-    }
-    localStorage.setItem('saved', new Date().getTime());
+let saved = localStorage.getItem('saved')
+if (saved && (new Date().getTime() - saved > hours * 60 * 60 * 1000)) {
+  localStorage.clear()
+}
+localStorage.setItem('saved', new Date().getTime());
 
-function Purchases({lang, count, replace, gender, start, time, name, present, point, countAmount}) {
+function Purchases({ lang, count, replace, gender, start, time, name, present, point, countAmount }) {
+
   this.countAmount = countAmount;
+  CountAmount = countAmount;
+
+  if (typeof(CountAmount) == 'object') {
+    if (CountAmount.length == 0) {
+      CountAmount = [2, 3, 4, 5];
+    } else {
+      countAmount;
+    }
+  } else {
+    CountAmount = [2, 3, 4, 5];
+  }
+
   this.lang = lang;
 
-this.name = name;
-Name = name;
-if (Name == undefined || Name == '') {
-  Name = 'name';
-}
+  this.name = name;
+  Name = name;
+  if (Name == undefined || Name == '') {
+    Name = 'name';
+  }
 
   this.gender = gender || [`male`, `female`];
   this.point = point;
 
   let Point;
   if (point !== '') {
-   Point = document.querySelectorAll(this.point)[0]
+    Point = document.querySelectorAll(this.point)[0]
   }
 
   if (gender == '' || gender == undefined) {
@@ -45,7 +58,7 @@ if (Name == undefined || Name == '') {
     Present = false;
   }
 
-  this.count = (count && count < 10) ? count : 10;
+  this.count = (count && count < 10 && count >= 1) ? count : 10;
   Count = count;
 
   this.start = start || getRandomInteger(10000, 15000);
@@ -56,17 +69,26 @@ if (Name == undefined || Name == '') {
   }
 
   if (localStorage.getItem(`purchases`) !== null) {
-    const {countOrder, customers, numberPurchase, giftCustomers} = JSON.parse(localStorage.getItem(`purchases`));
+    const { countOrder, customers, numberPurchase, giftCustomers } = JSON.parse(localStorage.getItem(`purchases`));
     this.countOrder = countOrder;
     this.customers = customers;
     this.giftCustomers = giftCustomers;
     this.numberPurchase = numberPurchase;
-  } else if (Point)  {
+  } else if (Point) {
+    let timerStart = setTimeout(() => {
+      this.numberPurchase = 1;
+      this.getCustomers()
+      this.getGiftCustomers()
+      this.getCountOrder()
+      localStorage.setItem(`purchases`, JSON.stringify(this));
+      this.prepare();
+      window.removeEventListener("scroll", showThrottle);
+    }, this.start);
 
 
-      if (localStorage.getItem(`purchases`) === null) {
+    if (localStorage.getItem(`purchases`) === null) {
 
-        let r = Point.offsetTop;
+      let r = Point.offsetTop;
       function throttle(func, ms) {
         let isThrottled = false,
           savedArgs,
@@ -94,9 +116,10 @@ if (Name == undefined || Name == '') {
         return wrapper;
       }
 
-      var showThrottle = throttle(()=> {
+      var showThrottle = throttle(() => {
 
-        if (window.window.pageYOffset + window.innerHeight > r) {
+        if (window.pageYOffset + window.innerHeight > r) {
+          clearTimeout(timerStart);
           this.numberPurchase = 1;
           this.getCustomers()
           this.getGiftCustomers()
@@ -104,25 +127,24 @@ if (Name == undefined || Name == '') {
           localStorage.setItem(`purchases`, JSON.stringify(this));
           this.prepare();
           window.removeEventListener("scroll", showThrottle);
-
         }
       }, 100);
 
       window.addEventListener("scroll", showThrottle);
     }
 
-  } else {
-    if (localStorage.getItem(`purchases`) === null) {
-      this.numberPurchase = 1;
-          this.getCustomers();
-          this.getGiftCustomers();
-          this.getCountOrder();
-          localStorage.setItem(`purchases`, JSON.stringify(this));
   }
+  else if (Point == undefined) {
+    this.numberPurchase = 1;
+    this.getCustomers()
+    this.getGiftCustomers()
+    this.getCountOrder()
+    localStorage.setItem(`purchases`, JSON.stringify(this));
   }
+
   if (Point) {
     if (localStorage.getItem(`purchases`) === null) {
-    console.log('');
+      console.log('');
     } else {
       this.prepare();
     }
@@ -141,125 +163,125 @@ Purchases.prototype.getCustomers = function () {
   if (this.lang == '') {
     this.customers = 0;
     console.log('error');
-  } else if (this.lang == ['pl'] || this.lang == ['hu'] || this.lang == ['sk'] || this.lang == ['cz'] || this.lang == ['bg'] || this.lang == ['ro'] || this.lang == ['lt']) {
-  this.customers = [];
-  let count = 1;
+  } else if (this.lang == ['pl'] || this.lang == ['hu'] || this.lang == ['sk'] || this.lang == ['cz'] || this.lang == ['bg'] || this.lang == ['ro'] || this.lang == ['lt'] || this.lang == ['ru']) {
+    this.customers = [];
+    let count = 1;
 
 
 
-  let y = [];
-  y.push('male', 'female');
+    let y = [];
+    y.push('male', 'female');
 
-  if (this.gender[0] + this.gender[1] == y[0] + y[1]) {
-    numberPerson = Math.floor(this.names[this.lang].male.length / 2 + this.names[this.lang].female.length / 2);
-  } else {
-    numberPerson = this.names[this.lang][this.gender].length;
-  }
+    if (this.gender[0] + this.gender[1] == y[0] + y[1]) {
+      numberPerson = Math.floor(this.names[this.lang].male.length / 2 + this.names[this.lang].female.length / 2);
+    } else {
+      numberPerson = this.names[this.lang][this.gender].length;
+    }
 
-  for (let i = 1; i < numberPerson; i++) {
-    count--;
+    for (let i = 1; i < numberPerson; i++) {
+      count--;
+
+      let gender = getRandomGender(this.gender);
+      let city = null;
+
+
+      city = this.getRandomCity();
+
+      if (count === 0) {
+        count = 3;
+      }
+
+      this.customers.push({
+        gender,
+        city,
+        name: this.getRundomGenderName(gender),
+        count: CountAmount[getRandomInteger(0, CountAmount.length - 1)],
+      });
+    }
 
     let gender = getRandomGender(this.gender);
-    let city = null;
-
-
-    city = this.getRandomCity();
-
-    if (count === 0) {
-      count = 3;
-    }
 
     this.customers.push({
       gender,
-      city,
+      city: this.getRandomCity(),
       name: this.getRundomGenderName(gender),
-      count: this.countAmount[getRandomInteger(0, this.countAmount.length - 1)],
+      count: 4,
     });
+
+  } else {
+    this.customers = 0;
+    console.log('The language is not supported!')
   }
-
-  let gender = getRandomGender(this.gender);
-
-  this.customers.push({
-    gender,
-    city: this.getRandomCity(),
-    name: this.getRundomGenderName(gender),
-    count: 4,
-  });
-
-} else {
-  this.customers = 0;
-  console.log('The language is not supported!')
-}
 };
 
 Purchases.prototype.getGiftCustomers = function () {
   if (this.lang == '') {
     this.customers = 0;
-  } else if (this.lang == ['pl'] || this.lang == ['hu'] || this.lang == ['sk'] || this.lang == ['cz'] || this.lang == ['bg'] || this.lang == ['ro'] || this.lang == ['lt']) {
-  this.giftCustomers = [];
-  let count = 1;
+  } else if (this.lang == ['pl'] || this.lang == ['hu'] || this.lang == ['sk'] || this.lang == ['cz'] || this.lang == ['bg'] || this.lang == ['ro'] || this.lang == ['lt'] || this.lang == ['ru']) {
+    this.giftCustomers = [];
+    let count = 1;
 
 
 
-  let y = [];
-  y.push('male', 'female');
+    let y = [];
+    y.push('male', 'female');
 
-  if (this.gender[0] + this.gender[1] == y[0] + y[1]) {
-    numberPerson = this.names[this.lang].male.length / 2 + this.names[this.lang].female.length / 2;
-  } else {
-    numberPerson = this.names[this.lang][this.gender].length;
-  }
-  for (let i = 1; i < numberPerson; i++) {
-    count--;
-    let gender = getRandomGender(this.gender);
-    let city = null;
-
-    city = this.getRandomCity();
-
-    if (count === 0) {
-      count = 3;
+    if (this.gender[0] + this.gender[1] == y[0] + y[1]) {
+      numberPerson = this.names[this.lang].male.length / 2 + this.names[this.lang].female.length / 2;
+    } else {
+      numberPerson = this.names[this.lang][this.gender].length;
     }
+    for (let i = 1; i < numberPerson; i++) {
+      count--;
+      let gender = getRandomGender(this.gender);
+      let city = null;
+
+      city = this.getRandomCity();
+
+      if (count === 0) {
+        count = 3;
+      }
+
+      this.giftCustomers.push({
+        gender,
+        city,
+        name: this.getRundomGenderName(gender),
+        count: CountAmount[getRandomInteger(0, CountAmount.length - 1)],
+      });
+    }
+
+    let gender = getRandomGender(this.gender);
 
     this.giftCustomers.push({
       gender,
-      city,
+      city: this.getRandomCity(),
       name: this.getRundomGenderName(gender),
-      count: this.countAmount[getRandomInteger(0, this.countAmount.length - 1)],
+      count: 4,
     });
+
+  } else {
+    this.customers = 0;
   }
-
-  let gender = getRandomGender(this.gender);
-
-  this.giftCustomers.push({
-    gender,
-    city: this.getRandomCity(),
-    name: this.getRundomGenderName(gender),
-    count: 4,
-  });
-
-} else {
-  this.customers = 0;
-}
 };
 
 
 Purchases.prototype.getRundomGenderName = function (gender) {
- let fullName = this.names[this.lang][gender];
- let arrayName = fullName.map((item) => {
+  let fullName = this.names[this.lang][gender];
+  let arrayName = fullName.map((item) => {
     return item.split(' ').slice(0, 1);
   })
 
   let cutName = fullName.map((item) => {
-      let name = item.split(' ').slice(0, 1);
-      let surname = item.split(' ').slice(1, 2);
-      if (surname.join('').length > 3) {
+    let name = item.split(' ').slice(0, 1);
+    let surname = item.split(' ').slice(1, 2);
+    if (surname.join('').length > 3) {
       return `${name} ${(surname.join('').slice(0, -3) + '***')}`
-      } else if (surname.join('').length == 3) {
-        return `${name} ${(surname.join('').slice(0, 1) + '**')}`
-      } else {
-        return `${name} ${(surname.join('').slice(0, 1) + '*')}`
-      }
-    })
+    } else if (surname.join('').length == 3) {
+      return `${name} ${(surname.join('').slice(0, 1) + '**')}`
+    } else {
+      return `${name} ${(surname.join('').slice(0, 1) + '*')}`
+    }
+  })
 
   let pushName;
   if (Name === 'full') {
@@ -279,39 +301,39 @@ Purchases.prototype.getCountOrder = function () {
   for (let i = 0; i < this.customers.length; i++) {
     current++;
     if (current !== Count) {
-    if (Present == true) {
-      if (this.customers[i].count == 3) {
-    count += this.customers[i].count + 1;
+      if (Present == true) {
+        if (this.customers[i].count == 3) {
+          count += this.customers[i].count + 1;
+        }
+        else if (this.customers[i].count == 4) {
+          count += this.customers[i].count + 2;
+        }
+        else if (this.customers[i].count == 5) {
+          count += this.customers[i].count + 3;
+        } else {
+          count += this.customers[i].count;
+        }
+      } else {
+        count += this.customers[i].count
+      }
+    } else if (current === Count) {
+      if (Present == true) {
+        if (this.customers[i].count == 3) {
+          count += this.customers[i].count + 1;
+        }
+        else if (this.customers[i].count == 4) {
+          count += this.customers[i].count + 2;
+        }
+        else if (this.customers[i].count == 5) {
+          count += this.customers[i].count + 3;
+        } else {
+          count += this.customers[i].count;
+        }
+      } else {
+        count += this.customers[i].count;
+      }
+      this.customers.length = Count * 2;
     }
-     else if (this.customers[i].count == 4) {
-    count += this.customers[i].count + 2;
-    }
-     else if (this.customers[i].count == 5) {
-    count += this.customers[i].count + 3;
-    } else {
-      count += this.customers[i].count;
-    }
-  } else {
-    count += this.customers[i].count
-  }
-} else if (current === Count) {
-  if (Present == true) {
-    if (this.customers[i].count == 3) {
-  count += this.customers[i].count + 1;
-  }
-   else if (this.customers[i].count == 4) {
-  count += this.customers[i].count + 2;
-  }
-   else if (this.customers[i].count == 5) {
-  count += this.customers[i].count + 3;
-  } else {
-    count += this.customers[i].count;
-  }
-} else {
-  count += this.customers[i].count;
-}
-    this.customers.length = Count * 2;
-}
   }
   this.countOrder = count;
 };
@@ -320,11 +342,11 @@ Purchases.prototype.getCountOrder = function () {
 // get city person
 function getCity() {
   return fetch(`https://api.sypexgeo.net/json/`)
- .then((response) => response.json())
- .then((json) => {
-   localStorage.setItem(`city`, json.city.name_en);
-   return true;
- }).catch(() => false);
+    .then((response) => response.json())
+    .then((json) => {
+      localStorage.setItem(`city`, json.city.name_en);
+      return true;
+    }).catch(() => false);
 
 }
 getCity();
@@ -332,45 +354,45 @@ getCity();
 
 Purchases.prototype.getOrder = function (gender) {
   const list = {
-    ru: {male: `заказал`, female: `заказала`},
-    en: {male: `requested`, female: `requested`},
-    bg: {male: `заяви`, female: `заяви`},
-    pl: {male: `poprosił`, female: `poprosiła`},
-    ro: {male: `a solicitat`, female: `a solicitat`},
-    sk: {male: `požiadal`, female: `požiadala`},
-    cz: {male: `požádal`, female: `požádala`},
-    lt: {male: `pateikė`, female: `pateikė`},
-    hu: {male: `ingyenes`, female: `ingyenes`},
+    ru: { male: `заказал`, female: `заказала` },
+    en: { male: `requested`, female: `requested` },
+    bg: { male: `заяви`, female: `заяви` },
+    pl: { male: `poprosił`, female: `poprosiła` },
+    ro: { male: `a solicitat`, female: `a solicitat` },
+    sk: { male: `požiadal`, female: `požiadala` },
+    cz: { male: `požádal`, female: `požádala` },
+    lt: { male: `pateikė`, female: `pateikė` },
+    hu: { male: `ingyenes`, female: `ingyenes` },
   };
   return list[this.lang][gender];
 };
 
 Purchases.prototype.getLeft = function (gender) {
   const list = {
-    ru: {male: `оставил`, female: `оставила`},
-    en: {male: `left`, female: `left`},
-    bg: {male: `остави`, female: `остави`},
-    pl: {male: `poprosił`, female: `poprosiła`},
-    ro: {male: `a făcut`, female: `a făcut`},
-    sk: {male: `zanechal`, female: `zanechala`},
-    cz: {male: `požádal`, female: `požádala`},
-    lt: {male: `pateikė`, female: `pateikė`},
-    hu: {male: `visszahívást`, female: `visszahívást`},
+    ru: { male: `оставил`, female: `оставила` },
+    en: { male: `left`, female: `left` },
+    bg: { male: `остави`, female: `остави` },
+    pl: { male: `poprosił`, female: `poprosiła` },
+    ro: { male: `a făcut`, female: `a făcut` },
+    sk: { male: `zanechal`, female: `zanechala` },
+    cz: { male: `požádal`, female: `požádala` },
+    lt: { male: `pateikė`, female: `pateikė` },
+    hu: { male: `visszahívást`, female: `visszahívást` },
   };
   return list[this.lang][gender];
 };
 
 Purchases.prototype.getReceive = function (gender) {
   const list = {
-    ru: {male: `получил`, female: `получила`},
-    en: {male: `received`, female: `received`},
-    bg: {male: `получи`, female: `получи`},
-    pl: {male: `otrzymał`, female: `otrzymała`},
-    ro: {male: `a primit`, female: `a primit`},
-    sk: {male: `si prevzal`, female: `si prevzala`},
-    cz: {male: `obdržel`, female: `obdržela`},
-    lt: {male: `gavo`, female: `gavo`},
-    hu: {male: `rendelést`, female: `rendelést`},
+    ru: { male: `получил`, female: `получила` },
+    en: { male: `received`, female: `received` },
+    bg: { male: `получи`, female: `получи` },
+    pl: { male: `otrzymał`, female: `otrzymała` },
+    ro: { male: `a primit`, female: `a primit` },
+    sk: { male: `si prevzal`, female: `si prevzala` },
+    cz: { male: `obdržel`, female: `obdržela` },
+    lt: { male: `gavo`, female: `gavo` },
+    hu: { male: `rendelést`, female: `rendelést` },
   };
   return list[this.lang][gender];
 };
@@ -406,6 +428,8 @@ Purchases.prototype.getOrderPurchase = function () {
   };
   return list[this.lang];
 };
+
+
 Purchases.prototype.getOrderPurchaseCity = function () {
   this.countOrder -= this.customer.count;
   if (Present == true) {
@@ -424,12 +448,11 @@ Purchases.prototype.getOrderPurchaseCity = function () {
   }
   // loaction
   let localCity;
-if (localStorage.getItem('city') !== '')
-{
-  localCity = localStorage.getItem('city');
-} else {
+  if (localStorage.getItem('city') !== '') {
+    localCity = localStorage.getItem('city');
+  } else {
     localCity = this.customer.city;
-}
+  }
   const list = {
     ru: `<div class="purchases purchases--bag purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getOrder(this.customer.gender)} ${this.customer.count}&nbsp;шт.</span><br>Доставка в: ${localCity}</div></div>`,
     en: `<div class="purchases purchases--bag purchases--in"><div class="purchases__main"><span class="red">${this.customer.name} ${this.getOrder(this.customer.gender)} ${this.customer.count}&nbsp;шт.</span><br>Delivery to the city of: ${localCity}</div></div>`,
@@ -459,14 +482,15 @@ Purchases.prototype.getPackagesPurchase = function () {
   };
   return list[this.lang];
 };
+
+
 Purchases.prototype.getPackagesPurchaseCity = function () {
   let localCity;
-if (localStorage.getItem('city') !== '')
-{
-  localCity = localStorage.getItem('city');
-} else {
+  if (localStorage.getItem('city') !== '') {
+    localCity = localStorage.getItem('city');
+  } else {
     localCity = this.giftCustomer.city;
-}
+  }
   const list = {
     ru: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)}&nbsp;заказ ${this.giftCustomer.count}&nbsp;шт.</span><br>Заказ доставлен в: ${localCity}</div></div>`,
     en: `<div class="purchases purchases__post purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name} ${this.getReceive(this.giftCustomer.gender)}&nbsp;an order of ${this.giftCustomer.count}&nbsp;pcs.</span><br>The order has been delivered to: ${localCity}</div></div>`,
@@ -480,6 +504,8 @@ if (localStorage.getItem('city') !== '')
   };
   return list[this.lang];
 };
+
+
 Purchases.prototype.getApplication = function () {
   const list = {
     ru: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getLeft(this.giftCustomer.gender)}&nbsp;заявку на обратный звонок</div></div>`,
@@ -494,6 +520,8 @@ Purchases.prototype.getApplication = function () {
   };
   return list[this.lang];
 };
+
+
 Purchases.prototype.getСonsultation = function () {
   const list = {
     ru: `<div class="purchases purchases__call purchases--truck purchases--in"><div class="purchases__main"><span class="red">${this.giftCustomer.name}</span> ${this.getOrder(this.giftCustomer.gender)}&nbsp;бесплатную консультацию</div></div>`,
@@ -555,9 +583,9 @@ Purchases.prototype.prepare = function () {
 
   this.replaceCountOrder();
   if (this.customers.length > 0) {
-    setTimeout(() => {
-      document.body.insertAdjacentHTML(`beforeend`, purchases);
-    }, this.start);
+    // setTimeout(() => {
+    //   document.body.insertAdjacentHTML(`beforeend`, purchases);
+    // }, this.start);
 
     setTimeout(() => {
       this.renderPurchases();
@@ -585,36 +613,35 @@ const randomInteger = (min, max) => {
   return rand;
 }
 
-Purchases.prototype.randomMessage = function() {
+Purchases.prototype.randomMessage = function () {
 
   let content = null;
   let countRandom = randomInteger(0, 4);
-    switch(countRandom)
-    {
-        case 0:
-        content = this.getPeopleOnSite();
-        break;
+  switch (countRandom) {
+    case 0:
+      content = this.getPeopleOnSite();
+      break;
 
-        case 1:
-          this.giftCustomer = this.giftCustomers.pop();
-          content = this.getPackagesPurchase();
-        break;
+    case 1:
+      this.giftCustomer = this.giftCustomers.pop();
+      content = this.getPackagesPurchase();
+      break;
 
-        case 2:
-          this.giftCustomer = this.giftCustomers.pop();
-          content = this.getСonsultation();
-        break;
-        case 3:
-          this.giftCustomer = this.giftCustomers.pop();
-          content = this.getApplication();
-        break;
-        case 4:
-          this.giftCustomer = this.giftCustomers.pop();
-          content = this.getPackagesPurchaseCity();
-        break;
+    case 2:
+      this.giftCustomer = this.giftCustomers.pop();
+      content = this.getСonsultation();
+      break;
+    case 3:
+      this.giftCustomer = this.giftCustomers.pop();
+      content = this.getApplication();
+      break;
+    case 4:
+      this.giftCustomer = this.giftCustomers.pop();
+      content = this.getPackagesPurchaseCity();
+      break;
 
-}
-return content
+  }
+  return content
 }
 
 //
@@ -659,6 +686,7 @@ Purchases.prototype.getNextPurchase = function () {
 };
 
 Purchases.prototype.renderPurchases = function () {
+
   document.body.insertAdjacentHTML(`beforeend`, this.getNextPurchase());
 
   this.replaceCountOrder();
@@ -672,8 +700,14 @@ Purchases.prototype.renderPurchases = function () {
 
   setTimeout(() => {
     document.querySelector(`.purchases`).remove();
-  }, 150);
+  }, this.time);
 
+
+  // if (this.customers.length == 0) {
+  //   setTimeout(() => {
+  //     document.querySelector(`.purchases`).remove();
+  //   }, this.time);
+  // }
 
   if (this.customers.length > 0) {
     setTimeout(() => {

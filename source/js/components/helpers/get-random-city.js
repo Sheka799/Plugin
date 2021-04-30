@@ -5,6 +5,7 @@ import SK from './../countries/cities/sk';
 import RO from './../countries/cities/ro';
 import PL from './../countries/cities/pl';
 import BG from './../countries/cities/bg';
+import RU from './../countries/cities/ru';
 import getRandomArrayItem from "./get-random-array-item";
 
 const dictionary = {
@@ -14,7 +15,8 @@ const dictionary = {
   sk: SK,
   ro: RO,
   pl: PL,
-  bg: BG
+  bg: BG,
+  ru: RU
 };
 
 function getRandomCity(lang) {
